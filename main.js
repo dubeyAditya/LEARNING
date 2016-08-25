@@ -1,0 +1,10 @@
+var makeTree = require("./treeJson");
+var args = process.argv; 
+var parent = args[1].split("\\")[args.length-2];
+var pathArray = args[1].split("\\");
+pathArray.splice(args.length-1,1);
+var path = pathArray.join("/"); 
+var node_label = args[2];
+var child_label = args[3]; 
+var obj = makeTree(path,parent,node_label,child_label);
+console.log(obj);
