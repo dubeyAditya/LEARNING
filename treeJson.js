@@ -1,18 +1,21 @@
 var fs = require("fs");
 var _ = require("underscore");
 var pathModule = require("path");
-function makeTree(directoryPath, parentName, nodeName, nodeChildren, exclude, allowedExtensions) {
-    var excluded_nodes = exclude ? exclude : [];
-    var allowed_extensions = allowedExtensions ? allowedExtensions : [];
+function makeTree(directoryPath, options) {
+    var excluded_nodes = options.exclude ? options.exclude : [];
+    var allowed_extensions = options.allowedExtensions ? options.allowedExtensions : [];
     var path = directoryPath ? directoryPath : "";
     if (!path)
-        throw new Error("Invalid file Name or got undefined");
+        return;
+    else if (path.indexOf("/") === -1)
+        return;
     else {
         var pathArray = directoryPath.split("/");
         var parentSplitIndex = pathArray.lastIndexOf("/");
-        var parent_name = parentName ? [] : pathArray.splice(parentSplitIndex+1, 1)[0];
-        var node_name = nodeName ? nodeName : "parent_node";
-        var node_children = nodeChildren ? nodeChildren : "child_nodes";
+        var parent_name = parentName ? [] : pathArray.splice(parentSplitIndex + 1, 1)[0];
+        var node_name = options.nodeName ? options.nodeName : "parent_node";
+        var node_children = options.nodeChildren ? options.nodeChildren : "child_nodes";
+
         function createNode(nodeName) {
             var nodeObject = {};
             nodeObject[node_name] = nodeName;
@@ -20,6 +23,7 @@ function makeTree(directoryPath, parentName, nodeName, nodeChildren, exclude, al
             nodeObject[node_children] = [];
             return nodeObject;
         }
+
         function generateTree(path, currentObject, previousObject) {
             var stats = fs.statSync(path);
             if (stats.isDirectory()) {
@@ -37,10 +41,9 @@ function makeTree(directoryPath, parentName, nodeName, nodeChildren, exclude, al
                     delete currentObject[node_children];
                     currentObject.type = "file";
                 }
-                else
-                {
-                    var indexOFexludedFile =  previousObject[node_children].indexOf(currentObject);
-                    previousObject[node_children].splice(indexOFexludedFile,1);
+                else {
+                    var indexOFexludedFile = previousObject[node_children].indexOf(currentObject);
+                    previousObject[node_children].splice(indexOFexludedFile, 1);
                 }
             }
             return currentObject;
@@ -48,6 +51,11 @@ function makeTree(directoryPath, parentName, nodeName, nodeChildren, exclude, al
         return JSON.stringify(generateTree(path, createNode(parent_name), null), 4);
     }
 };
+
+
+
+
+
 
 module.exports = makeTree;
 
